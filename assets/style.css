@@ -1108,6 +1108,11 @@ ul.dropdown-content li:last-child a {
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  text-align: center;
+  padding: 1 rem;
+  box-sizing: border-box;
+  
   width: 170px;        
   height: 170px;
   font-weight: bold;
@@ -2202,3 +2207,4 @@ ul.dropdown-content li:last-child a {
 .footer .list li a:hover {
   border-bottom-color: currentColor; 
 }
+
