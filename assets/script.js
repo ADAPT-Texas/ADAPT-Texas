@@ -43,74 +43,39 @@ const fadeObserver = new IntersectionObserver((entries, observer) => {
 
 faders.forEach(el => fadeObserver.observe(el));
 
-/**
- * ADAPT Texas — sitewide dismissible banner
- * ------------------------------------------
- * HOW TO USE:
- * 1. Save this file as /assets/banner.js on your site (next to your other assets).
- * 2. Edit the CONFIG section below (message, link, color).
- * 3. Add this one line before the closing </body> tag on every page:
- *      <script src="/assets/banner.js"></script>
- * 4. Done. The banner appears at the top of every page that includes the script.
- *    Once someone clicks the X, it won't show again for them for 7 days
- *    (change DISMISS_DAYS below to control that, or set to 0 to show every visit).
- */
 
+
+
+// ===== ADAPT Texas sitewide banner =====
 (function () {
-  // ------------- CONFIG: edit these -------------
   const CONFIG = {
-    message: "📣 ADAPT Texas Info Session 1 & 2 Coming Up!!",
-    linkText: "Learn more",
-    linkUrl: "https://forms.gle/UsU5ntxZbC3WqeBdA", // set to "" to hide the link
-    bgColor: "#6a1b9a",      // ADAPT purple — change if you'd like
+    message: "📣 ADAPT Texas Info Sessions: Aug 28th 5-6PM @ CPE 2.208 and Sep 28th 5-6PM @ CPE 2.206 ",
+    linkText: "Interest Form + More Information",
+    linkUrl: "https://forms.gle/UsU5ntxZbC3WqeBdA", // relative path, since it's already on the site — set to "" to hide the link
+    bgColor: "#6a1b9a",
     textColor: "#ffffff",
-    dismissDays: 7,          // days before the banner reappears after being closed; 0 = always show
-    storageKey: "adapt_banner_dismissed_v1" // bump the "_v1" when you change the message,
-                                             // so people who already dismissed the old one see the new one
+    dismissDays: 7,          // days before it reappears after being closed; 0 = show every visit
+    storageKey: "adapt_banner_dismissed_v1"
   };
-  // ------------------------------------------------
 
   function isDismissed() {
     if (CONFIG.dismissDays === 0) return false;
     const stored = localStorage.getItem(CONFIG.storageKey);
     if (!stored) return false;
-    const dismissedAt = parseInt(stored, 10);
-    const msElapsed = Date.now() - dismissedAt;
-    const msLimit = CONFIG.dismissDays * 24 * 60 * 60 * 1000;
-    return msElapsed < msLimit;
+    return (Date.now() - parseInt(stored, 10)) < CONFIG.dismissDays * 86400000;
   }
 
   function dismiss(banner) {
     localStorage.setItem(CONFIG.storageKey, Date.now().toString());
-    banner.style.transform = "translateY(-100%)";
-    setTimeout(() => banner.remove(), 250);
-    document.body.style.marginTop = "";
+    banner.remove();
   }
 
-  function buildBanner() {
+  function initBanner() {
+    if (isDismissed()) return;
     const banner = document.createElement("div");
     banner.setAttribute("role", "region");
     banner.setAttribute("aria-label", "Site announcement");
-    banner.style.cssText = `
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 9999;
-      background: ${CONFIG.bgColor};
-      color: ${CONFIG.textColor};
-      font-family: inherit;
-      font-size: 15px;
-      padding: 10px 44px 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      text-align: center;
-      transition: transform 0.25s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    `;
+    banner.style.cssText = `position:sticky;top:0;left:0;right:0;z-index:9999;background:${CONFIG.bgColor};color:${CONFIG.textColor};font-size:15px;padding:10px 44px 10px 16px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.15);`;
 
     const text = document.createElement("span");
     text.textContent = CONFIG.message;
@@ -120,41 +85,23 @@ faders.forEach(el => fadeObserver.observe(el));
       const link = document.createElement("a");
       link.href = CONFIG.linkUrl;
       link.textContent = CONFIG.linkText;
-      link.style.cssText = `color: ${CONFIG.textColor}; text-decoration: underline; font-weight: 600; white-space: nowrap;`;
+      link.style.cssText = `color:${CONFIG.textColor};text-decoration:underline;font-weight:600;white-space:nowrap;`;
       banner.appendChild(link);
     }
 
     const closeBtn = document.createElement("button");
     closeBtn.setAttribute("aria-label", "Close announcement");
     closeBtn.textContent = "✕";
-    closeBtn.style.cssText = `
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: ${CONFIG.textColor};
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      padding: 4px 8px;
-    `;
+    closeBtn.style.cssText = `position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:${CONFIG.textColor};font-size:18px;cursor:pointer;padding:4px 8px;`;
     closeBtn.addEventListener("click", () => dismiss(banner));
     banner.appendChild(closeBtn);
 
-    return banner;
-  }
-
-  function init() {
-    if (isDismissed()) return;
-    const banner = buildBanner();
     document.body.prepend(banner);
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", initBanner);
   } else {
-    init();
+    initBanner();
   }
 })();
